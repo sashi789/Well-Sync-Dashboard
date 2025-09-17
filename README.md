@@ -115,6 +115,7 @@ docker-compose logs -f
 | Grafana | http://localhost:3000 | admin/admin |
 | InfluxDB | http://localhost:8086 | admin/admin123 |
 | PostgreSQL | localhost:5432 | postgres/postgres |
+| pgAdmin | http://localhost:5050 | admin@local.com/admin |
 
 ### 4. Monitor the Pipeline
 ```bash
@@ -273,6 +274,28 @@ docker exec -it kafka kafka-run-class kafka.tools.GetOffsetShell --bootstrap-ser
    - Verify InfluxDB data source configuration
    - Check if data is being written to InfluxDB
    - Verify time range in dashboard
+   - If Grafana exits with "Datasource provisioning error: data source not found":
+     1) `docker compose rm -f grafana`
+     2) `docker volume rm dashbord_grafana-data`
+     3) `docker compose up -d grafana`
+
+4. **pgAdmin login / connection**
+   - Default login is `admin@local.com / admin` (configurable via `PGADMIN_DEFAULT_EMAIL`, `PGADMIN_DEFAULT_PASSWORD` in `docker-compose.yml`)
+   - Register server in pgAdmin with:
+     - Host: `postgres`, Port: `5432`, Maintenance DB: `postgres`, User: `postgres`, Password: `postgres`
+
+## Daily usage
+
+### Start
+```bash
+cd "/Users/sashidharchary/Desktop/Cavelle Energy/Dashbord"
+docker compose up -d
+```
+
+### Stop
+```bash
+docker compose down
+```
 
 ### Performance Tuning
 
