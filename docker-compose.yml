@@ -99,6 +99,24 @@ services:
     networks:
       - drilling-network
 
+  # pgAdmin for managing PostgreSQL
+  pgadmin:
+    image: dpage/pgadmin4:8.11
+    hostname: pgadmin
+    container_name: pgadmin
+    depends_on:
+      - postgres
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@local.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - drilling-network
+    restart: unless-stopped
+
   # Kafka Producer Service
   kafka-producer:
     build:
@@ -156,6 +174,7 @@ volumes:
   influxdb-data:
   influxdb-config:
   grafana-data:
+  pgadmin-data:
 
 networks:
   drilling-network:
