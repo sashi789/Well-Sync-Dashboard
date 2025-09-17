@@ -11,7 +11,7 @@
 - **CPU**: 4+ cores recommended
 
 ### Network Requirements
-- **Ports**: 3000, 5432, 8086, 9092, 2181 must be available
+- **Ports**: 3000 (Grafana), 5432 (Postgres), 8086 (InfluxDB), 9092 (Kafka), 2181 (Zookeeper), 5050 (pgAdmin) must be available
 - **Internet**: Required for downloading Docker images
 - **Firewall**: Ensure Docker can access required ports
 
@@ -91,6 +91,9 @@ curl -i http://localhost:8086/health
 
 # Verify Grafana is accessible
 curl -i http://localhost:3000/api/health
+
+# Verify pgAdmin is accessible
+curl -i http://localhost:5050
 ```
 
 ## Configuration
@@ -115,6 +118,10 @@ INFLUXDB_TOKEN=your_secure_token
 # Grafana Configuration
 GRAFANA_USER=admin
 GRAFANA_PASSWORD=your_secure_password
+
+# pgAdmin Configuration
+PGADMIN_DEFAULT_EMAIL=admin@local.com
+PGADMIN_DEFAULT_PASSWORD=your_secure_password
 
 # Producer Configuration
 PRODUCER_BATCH_SIZE=100
@@ -298,6 +305,26 @@ curl -H "Authorization: Bearer admin:admin" \
 
 # Restart Grafana service
 docker-compose restart grafana
+
+#### 6. pgAdmin Issues
+
+**Problem**: Invalid email error at startup
+
+**Solution**: Ensure `PGADMIN_DEFAULT_EMAIL` contains a valid email, e.g. `admin@local.com`, then recreate pgAdmin:
+```bash
+docker compose rm -f pgadmin && docker volume rm dashbord_pgadmin-data && docker compose up -d pgadmin
+```
+
+**Problem**: Cannot connect from pgAdmin to Postgres
+
+**Solutions**:
+```bash
+# Use service name inside Docker network
+Host: postgres
+Port: 5432
+User: postgres
+Password: value from POSTGRES_PASSWORD in docker-compose.yml
+```
 ```
 
 #### 5. High Memory Usage
@@ -526,3 +553,4 @@ For additional support, refer to the component documentation:
 - [TimescaleDB Documentation](https://docs.timescale.com/)
 - [InfluxDB Documentation](https://docs.influxdata.com/)
 - [Grafana Documentation](https://grafana.com/docs/)
+- [pgAdmin Documentation](https://www.pgadmin.org/docs/)
