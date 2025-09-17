@@ -1,0 +1,18 @@
+apiVersion: 1
+
+datasources:
+  - name: InfluxDB
+    uid: influxdb
+    type: influxdb
+    access: proxy
+    url: http://influxdb:8086
+    jsonData:
+      version: Flux
+      organization: drilling
+      defaultBucket: sensor-data
+      tlsSkipVerify: true
+      httpMode: POST
+    secureJsonData:
+      token: drilling-token-123
+    isDefault: true
+    editable: true
