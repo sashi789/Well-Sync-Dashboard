@@ -117,6 +117,41 @@ services:
       - drilling-network
     restart: unless-stopped
 
+  # Kafka Manager (CMAK) for visual Kafka monitoring
+  kafka-manager:
+    image: hlebalbau/kafka-manager:stable
+    hostname: kafka-manager
+    container_name: kafka-manager
+    depends_on:
+      - kafka
+      - zookeeper
+    ports:
+      - "9000:9000"
+    environment:
+      ZK_HOSTS: zookeeper:2181
+      APPLICATION_SECRET: "letmein"
+      KAFKA_MANAGER_AUTH_ENABLED: "false"
+    networks:
+      - drilling-network
+    restart: unless-stopped
+
+  # Kafdrop - Simple Kafka Web UI
+  kafdrop:
+    image: obsidiandynamics/kafdrop:latest
+    hostname: kafdrop
+    container_name: kafdrop
+    depends_on:
+      - kafka
+    ports:
+      - "9001:9000"
+    environment:
+      KAFKA_BROKERCONNECT: kafka:29092
+      JVM_OPTS: "-Xms32M -Xmx64M"
+      SERVER_SERVLET_CONTEXTPATH: "/"
+    networks:
+      - drilling-network
+    restart: unless-stopped
+
   # Kafka Producer Service
   kafka-producer:
     build:

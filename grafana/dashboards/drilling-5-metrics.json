@@ -389,7 +389,9 @@
               }
             ]
           },
-          "unit": "ft/hr"
+          "unit": "ft/hr",
+          "min": 0,
+          "max": 1
         },
         "overrides": []
       },
@@ -476,7 +478,9 @@
               }
             ]
           },
-          "unit": "rpm"
+          "unit": "rpm",
+          "min": 0,
+          "max": 0.1
         },
         "overrides": []
       },
