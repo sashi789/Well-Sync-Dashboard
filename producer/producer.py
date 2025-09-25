@@ -30,6 +30,7 @@ class DrillingDataProducer:
         self.csv_file_path = os.getenv('CSV_FILE_PATH', '/data/78B-32_1_sec_data_27200701.csv')
         self.batch_size = int(os.getenv('PRODUCER_BATCH_SIZE', '100'))
         self.delay_ms = int(os.getenv('PRODUCER_DELAY_MS', '1000'))
+        self.use_original_timestamps = os.getenv('USE_ORIGINAL_TIMESTAMPS', 'true').lower() == 'true'
         
         # Initialize Kafka producer
         self.producer = self._create_producer()
@@ -147,17 +148,22 @@ class DrillingDataProducer:
                             error_count += 1
                             continue
                         # Shift original CSV timestamp to "now" so Grafana/Influx show data in recent window
-                        try:
-                            original_ts_str = parsed_data.get('timestamp', '')
-                            data_ts = datetime.strptime(original_ts_str, "%Y/%m/%d %H:%M:%S")
-                            if sim_start_data_ts is None:
-                                sim_start_data_ts = data_ts
-                            delta = data_ts - sim_start_data_ts
-                            simulated_ts = sim_start_wallclock + delta
-                            parsed_data['timestamp'] = simulated_ts.strftime("%Y/%m/%d %H:%M:%S")
-                        except Exception:
-                            # If shifting fails, keep original timestamp
-                            pass
+                        if not self.use_original_timestamps:
+                            try:
+                                original_ts_str = parsed_data.get('timestamp', '')
+                                data_ts = datetime.strptime(original_ts_str, "%Y/%m/%d %H:%M:%S")
+                                if sim_start_data_ts is None:
+                                    sim_start_data_ts = data_ts
+                                delta = data_ts - sim_start_data_ts
+                                simulated_ts = sim_start_wallclock + delta
+                                parsed_data['timestamp'] = simulated_ts.strftime("%Y/%m/%d %H:%M:%S")
+                                logger.info(f"USE_ORIGINAL_TIMESTAMPS: {self.use_original_timestamps}, Simulated timestamp: {simulated_ts.strftime('%Y/%m/%d %H:%M:%S')}")
+                            except Exception:
+                                # If shifting fails, keep original timestamp
+                                logger.warning("Failed to shift timestamp, keeping original")
+                                pass
+                        else:
+                            logger.info(f"USE_ORIGINAL_TIMESTAMPS: {self.use_original_timestamps}, Original timestamp: {parsed_data.get('timestamp', '')}")
                         
                         if self._send_message(parsed_data, total_rows_sent):
                             success_count += 1

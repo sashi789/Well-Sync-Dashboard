@@ -82,7 +82,7 @@ services:
 
   # Grafana for visualization
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:9.5.15
     hostname: grafana
     container_name: grafana
     ports:
@@ -117,6 +117,41 @@ services:
       - drilling-network
     restart: unless-stopped
 
+  # Kafka Manager (CMAK) for visual Kafka monitoring
+  kafka-manager:
+    image: hlebalbau/kafka-manager:stable
+    hostname: kafka-manager
+    container_name: kafka-manager
+    depends_on:
+      - kafka
+      - zookeeper
+    ports:
+      - "9000:9000"
+    environment:
+      ZK_HOSTS: zookeeper:2181
+      APPLICATION_SECRET: "letmein"
+      KAFKA_MANAGER_AUTH_ENABLED: "false"
+    networks:
+      - drilling-network
+    restart: unless-stopped
+
+  # Kafdrop - Simple Kafka Web UI
+  kafdrop:
+    image: obsidiandynamics/kafdrop:latest
+    hostname: kafdrop
+    container_name: kafdrop
+    depends_on:
+      - kafka
+    ports:
+      - "9001:9000"
+    environment:
+      KAFKA_BROKERCONNECT: kafka:29092
+      JVM_OPTS: "-Xms32M -Xmx64M"
+      SERVER_SERVLET_CONTEXTPATH: "/"
+    networks:
+      - drilling-network
+    restart: unless-stopped
+
   # Kafka Producer Service
   kafka-producer:
     build:
@@ -132,6 +167,7 @@ services:
       CSV_FILE_PATH: /data/78B-32_1_sec_data_27200701.csv
       PRODUCER_BATCH_SIZE: ${PRODUCER_BATCH_SIZE:-100}
       PRODUCER_DELAY_MS: ${PRODUCER_DELAY_MS:-1000}
+      USE_ORIGINAL_TIMESTAMPS: "false"
     volumes:
       - ./78B-32 1 sec data 27200701.csv:/data/78B-32_1_sec_data_27200701.csv:ro
     networks:
