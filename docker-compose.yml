@@ -82,7 +82,7 @@ services:
 
   # Grafana for visualization
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:9.5.15
     hostname: grafana
     container_name: grafana
     ports:
@@ -132,6 +132,7 @@ services:
       CSV_FILE_PATH: /data/78B-32_1_sec_data_27200701.csv
       PRODUCER_BATCH_SIZE: ${PRODUCER_BATCH_SIZE:-100}
       PRODUCER_DELAY_MS: ${PRODUCER_DELAY_MS:-1000}
+      USE_ORIGINAL_TIMESTAMPS: "false"
     volumes:
       - ./78B-32 1 sec data 27200701.csv:/data/78B-32_1_sec_data_27200701.csv:ro
     networks:
